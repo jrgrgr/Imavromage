@@ -2,7 +2,6 @@
 
 #include <ivmg/core/image.hpp>
 #include "utils.hpp"
-#include <array>
 #include <cassert>
 #include <filesystem>
 
@@ -11,11 +10,14 @@ namespace ivmg {
 
 using namespace types;
 
-using qoi_color_t = std::array<u8, 4> ;
-using qoi_diff_t = std::array<i16, 4> ;
+struct qoi_color_t { 
+    u8 r, g, b, a; 
+    bool operator==(const qoi_color_t& other) const {
+        return (r == other.r) && (g == other.g) && (b == other.b) && (a == other.a);
+    }
+};
 
-#define QOI_SRGB   0
-#define QOI_LINEAR 1
+struct qoi_diff_t { i8 r, g, b; };
 
 enum class QOI_COLORSPACE: u8 {
     SRGB = 0,
@@ -30,7 +32,6 @@ const u8 QOI_OP_INDEX =  0x00;     // 2 bits tag
 const u8 QOI_OP_DIFF  =  0x40;     // 2 bits tag
 const u8 QOI_OP_RUN   =  0xC0;     // 2 bits tag
 
-#define QOI_PIXEL_HASH(r,g,b,a) (r * 3 + g * 5 + b * 7 + a * 11) % 64;
 
 const u8 QOI_MASK_2   =  0xC0;
 
@@ -44,7 +45,10 @@ struct qoi_header {
 
 
 void encode_qoi(const Image& img, const std::filesystem::path& outfile);
+constexpr qoi_diff_t QOI_COLOR_DIFF(const qoi_color_t& c1, const qoi_color_t& c2);
+constexpr size_t QOI_PIXEL_HASH(const qoi_color_t& c);
 
-constexpr qoi_diff_t QOI_COLOR_DIFF(qoi_color_t& c1, qoi_color_t& c2);
+
+
 
 }
