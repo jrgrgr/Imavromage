@@ -30,7 +30,7 @@ class Logger {
 
         template <typename... Args>
         inline static void log(LOG_LEVEL lvl, const std::string &msg, Args&&... args) {
-            if(lvl > level) return;
+            if (lvl > level) return;
             auto formated_msg = std::vformat(msg, std::make_format_args(args...));
             std::println((lvl >= LOG_LEVEL::ERROR) ? std::cerr : std::cout, "{}{}", log_level_to_str.at(lvl), std::vformat(msg, std::make_format_args(args...)));
         }

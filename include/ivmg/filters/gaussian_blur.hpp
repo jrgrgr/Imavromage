@@ -16,12 +16,12 @@ private:
 public:
     GaussianBlur(uint8_t ks, double sigma = 0.0): Filter(ks), s(sigma) {
 
-        if(s == 0.0) s = std::max(ksize / 2.0, 1.0);
+        if (s == 0.0) s = std::max(ksize / 2.0, 1.0);
 
         double sum = 0.0;
 
         // Compute the kernel values
-        for(size_t i = 0; i < ksize * ksize; i++) {
+        for (size_t i = 0; i < ksize * ksize; i++) {
             const int16_t x = i / ksize - radius;
             const int16_t y = i % ksize - radius;
 
@@ -34,7 +34,7 @@ public:
         }
 
         // Normalise the kernel
-        for(size_t i = 0; i < ksize * ksize; i++) {
+        for (size_t i = 0; i < ksize * ksize; i++) {
             kernel[i] /= sum;
         }
     }

@@ -29,12 +29,12 @@ public:
     static ResultOr<Image, IVMG_DEC_ERR> decode(std::ifstream& file) {
         static Vec<Unique<Decoder>> decs;
 
-        if(decs.empty()) {
+        if (decs.empty()) {
             decs.emplace_back(std::make_unique<PNG_Decoder>());
         }
 
-        for(const auto& d : decs) {
-            if(d->can_decode(file))
+        for (const auto& d : decs) {
+            if (d->can_decode(file))
                 return d->decode(file);
         }
 

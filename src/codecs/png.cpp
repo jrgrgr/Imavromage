@@ -11,7 +11,7 @@ namespace ivmg {
 bool PNG_Decoder::can_decode(std::ifstream& filestream) const {
     auto startpos = filestream.tellg();
     char buffer[magic_length] = {0};
-    if(filestream.read(buffer, magic_length) && !filestream.fail() && std::memcmp(buffer, magic, magic_length) == 0) {
+    if (filestream.read(buffer, magic_length) && !filestream.fail() && std::memcmp(buffer, magic, magic_length) == 0) {
         filestream.seekg(startpos);
         return true;
     }
@@ -49,7 +49,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
 
         Logger::log(LOG_LEVEL::INFO, "Got chunk {:#x} of length {} bytes", static_cast<u32>(chunk.type), chunk.length);
 
-        switch(chunk.type) {
+        switch (chunk.type) {
 
             case ChunkType::IHDR:
                 this->decode_ihdr(chunk.data);
@@ -65,7 +65,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
                 break;
 
         }
-    } while(chunk.type != ChunkType::IEND);
+    } while (chunk.type != ChunkType::IEND);
 
     libdeflate_decompressor *decompressor = libdeflate_alloc_decompressor();
 
@@ -78,7 +78,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
         nullptr
     );
 
-    if(result != LIBDEFLATE_SUCCESS) {
+    if (result != LIBDEFLATE_SUCCESS) {
         std::println(std::cerr, "Deflate died");
         exit(result);
     }
@@ -107,7 +107,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
 
     const u8 in_out_chan_diff = img.nb_channels - bpp;
 
-    while(res.has_value()) {
+    while (res.has_value()) {
         std::span<const u8> scanline = res.value();
 
         PNG_FILT_TYPE filt = static_cast<PNG_FILT_TYPE>(scanline[0]);
@@ -120,12 +120,12 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
         std::span<u8> output_line(start, end);
         std::span<const u8> up_line(up_start, up_start + line_out_size);    // May contain garbage data for line_id = 0
 
-        switch(filt) {
+        switch (filt) {
 
         case PNG_FILT_TYPE::NONE: {
             D(n++;)
 
-            switch(color_type) {
+            switch (color_type) {
                 case PNG_COLOR_TYPE::RGBA: {
                     std::memcpy(output_line.data(), scanline.data(), scanline.size());
                     break;
@@ -133,7 +133,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
 
                 case PNG_COLOR_TYPE::RGB: {
 
-                    for(size_t i = 0; i < scanline.size(); i += bpp) {
+                    for (size_t i = 0; i < scanline.size(); i += bpp) {
                         const auto ipxl = (i / bpp) * (bpp + in_out_chan_diff);
                         std::memcpy(output_line.data() + ipxl, scanline.data() + i, bpp);
                     }
@@ -149,12 +149,12 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
         case PNG_FILT_TYPE::SUB: {
             D(s++;)
 
-            switch(color_type) {
+            switch (color_type) {
 
                 case PNG_COLOR_TYPE::RGBA:
                 case PNG_COLOR_TYPE::RGB: {
                     
-                    for(size_t i = 0; i < scanline.size(); i++) {
+                    for (size_t i = 0; i < scanline.size(); i++) {
                         const auto dest = i + (i / bpp) * in_out_chan_diff;
                         const u8 left = (i < bpp) ? 0 : output_line[dest - img.nb_channels];
                         output_line[dest] = left + scanline[i];
@@ -173,15 +173,15 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
         case PNG_FILT_TYPE::UP: {
             D(u++;)
 
-            switch(color_type) {
+            switch (color_type) {
 
                 case PNG_COLOR_TYPE::RGBA: {
 
-                    if(line_id == 0) {
+                    if (line_id == 0) {
                         std::memcpy(output_line.data(), scanline.data(), scanline.size());
                     }
                     else {
-                        for(size_t i = 0; i < output_line.size(); i++) {
+                        for (size_t i = 0; i < output_line.size(); i++) {
                             output_line[i] = up_line[i] + scanline[i];
                         }
                     }
@@ -199,11 +199,11 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
         case PNG_FILT_TYPE::AVG: {
             D(a++;)
 
-            switch(color_type) {
+            switch (color_type) {
 
                 case PNG_COLOR_TYPE::RGBA: {
 
-                    for(size_t i = 0; i < output_line.size(); i++) {
+                    for (size_t i = 0; i < output_line.size(); i++) {
                         const uint16_t left = (i < bpp) ? 0 : output_line[i - img.nb_channels];
                         const uint16_t up = (line_id == 0) ? 0 : up_line[i];
                         output_line[i] = scanline[i] + ((left + up) >> 1);
@@ -222,11 +222,11 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
         case PNG_FILT_TYPE::PAETH: {
             D(p++;)
 
-            switch(color_type) {
+            switch (color_type) {
 
                 case PNG_COLOR_TYPE::RGBA: {
 
-                    for(size_t i = 0; i < output_line.size(); i++) {
+                    for (size_t i = 0; i < output_line.size(); i++) {
                         const bool first_pixel = i < bpp;
                         const bool first_scanline = line_id == 0;
         
@@ -260,7 +260,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
 
 
 std::optional<std::span<const u8>> PNG_Decoder::get_scanline(std::span<const u8>& data, size_t scanline_size) {
-    if(data.size() == 0) 
+    if (data.size() == 0) 
         return std::nullopt;
 
     std::span<const u8> scanline = data.subspan(0, scanline_size);
@@ -306,8 +306,8 @@ u8 PNG_Decoder::paeth_predictor(u8 a, u8 b, u8 c) {
     const i16 pb = std::abs(p - b);
     const i16 pc = std::abs(p - c);
 
-    if(pa <= pb && pa <= pc) return a;
-    else if(pb <= pc) return b;
+    if (pa <= pb && pa <= pc) return a;
+    else if (pb <= pc) return b;
     else return c;
 }
 

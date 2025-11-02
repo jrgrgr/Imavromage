@@ -57,7 +57,7 @@ T read(std::span<const u8> data, size_t& idx) {
     size_t read_size_attempt = sizeof(T);
     size_t read_size_actual = read_size_attempt;
 
-    if(idx + read_size_attempt > data.size()) 
+    if (idx + read_size_attempt > data.size()) 
         read_size_actual = read_size_attempt - ((idx + read_size_attempt) - data.size());
 
     std::memcpy(&dest, data.data()+idx, read_size_actual);
@@ -67,6 +67,6 @@ T read(std::span<const u8> data, size_t& idx) {
     Logger::log(lvl, "Attempted to read {} bytes @ {:#x}, did read {}", 
         read_size_attempt, reinterpret_cast<std::uintptr_t>(data.data()+idx), read_size_actual);
     
-    if(std::endian::native != ordering) return std::byteswap(dest);
+    if (std::endian::native != ordering) return std::byteswap(dest);
     return dest;
 }

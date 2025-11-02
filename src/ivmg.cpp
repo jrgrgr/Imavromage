@@ -18,11 +18,11 @@ Image ivmg::open(const std::string& imgpath) {
     Vec<u8> file_buffer;
 
     auto res = DecoderRegistry::decode(file);
-    if(res.has_value()) {
+    if (res.has_value()) {
         return res.value();
     }
     else {
-        switch(res.error()) {
+        switch (res.error()) {
             case IVMG_DEC_ERR::UNKNOWN_FORMAT:
             break;
         }
@@ -39,7 +39,7 @@ std::expected<void, IVMG_ENC_ERR> ivmg::save(const Image &img, const std::filesy
 
     Formats target = ext_to_format.at(imgpath.extension());
 
-    if(encoders.contains(target)) {
+    if (encoders.contains(target)) {
         encoders.at(target)(img, imgpath);
         return {};
     }
