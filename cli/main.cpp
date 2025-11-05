@@ -1,4 +1,5 @@
 #include "argparse.hpp"
+#include <iostream>
 #include <ivmg/filters/gaussian_blur.hpp>
 #include <ivmg/ivmg.hpp>
 #include <ivmg/core/image.hpp>
@@ -44,11 +45,15 @@ int main(int argc, char** argv) {
     if(output_file == "-")
         output_file = "/dev/stdout";
 
-    int k = program.get<int>("--ksize");
-    int si = program.get<int>("--sigma");
+    // int k = program.get<int>("--ksize");
+    // int si = program.get<int>("--sigma");
 
     ivmg::Image img = ivmg::open(input_file);
-    ivmg::save(img, output_file);
+    if (!ivmg::save(img, output_file).has_value()) {
+        std::println(std::cerr, "Error when saving the file");
+    }
+
+
     // auto s = std::chrono::high_resolution_clock::now();
     // ivmg::Image img2 = img | GaussianBlur(k, si);
     // auto e = std::chrono::high_resolution_clock::now();

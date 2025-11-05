@@ -3,8 +3,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <unordered_map>
+#include <vector>
 
-#include "decoder.hpp"
+#include <ivmg/codecs/decoder.hpp>
 #include "macros.hpp"
 #include "utils.hpp"
 
@@ -70,18 +71,18 @@ private:
     u8 compression_method;
     u8 filter_method;
     u8 interlace_method;
-    Vec<u8> compressed_data;
-    Vec<u8> inflated_data;
+    std::vector<u8> compressed_data;
+    std::vector<u8> inflated_data;
 
 public:
     inline PNG_Decoder(): Decoder() {};
-    bool can_decode( std::ifstream& filestream) const override;
+    bool can_decode(std::ifstream& filestream) const override;
     Image decode(std::ifstream& filestream) override;
 
 private:
-    ChunkPNG read_chunk(Vec<u8>& file_buffer, size_t &read_idx);
+    ChunkPNG read_chunk(std::vector<u8>& file_buffer, size_t &read_idx);
     void decode_ihdr(std::span<u8> data);
-    Image decode_png(Vec<u8>& file_buffer);
+    Image decode_png(std::vector<u8>& file_buffer);
     u8 paeth_predictor(u8 a, u8 b, u8 c);
     std::optional<std::span<const u8>> get_scanline(std::span<const u8>& data, size_t scanline_size);
 };

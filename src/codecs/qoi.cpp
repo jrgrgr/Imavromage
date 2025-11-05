@@ -35,11 +35,11 @@ void ivmg::encode_qoi(const Image &img, const std::filesystem::path &outfile) {
     p += sizeof(hdr);
 
     for (size_t i = 0; i < img.size_bytes(); i += BYTE_PER_PIXEL) {
-        qoi_color_t cur_pxl = { 
-            img.get_raw_handle()[i], 
-            img.get_raw_handle()[i + 1], 
-            img.get_raw_handle()[i + 2], 
-            img.get_raw_handle()[i + 3] 
+        qoi_color_t cur_pxl = {
+            img.get_raw_handle()[i],
+            img.get_raw_handle()[i + 1],
+            img.get_raw_handle()[i + 2],
+            img.get_raw_handle()[i + 3]
         };
 
         if (cur_pxl == prev_pxl) {
@@ -59,11 +59,11 @@ void ivmg::encode_qoi(const Image &img, const std::filesystem::path &outfile) {
 
             int pxl_hash = QOI_PIXEL_HASH(cur_pxl);
 
-            if (color_cache.at(pxl_hash) == cur_pxl) 
+            if (color_cache.at(pxl_hash) == cur_pxl)
                 // out.put(QOI_OP_INDEX | pxl_hash);
                 test[p++] = QOI_OP_INDEX | pxl_hash;
 
-            
+
             else {
                 color_cache.at(pxl_hash) = cur_pxl;
 

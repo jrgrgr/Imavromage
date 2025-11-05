@@ -15,9 +15,9 @@ LOG_LEVEL Logger::level = LOG_LEVEL::NONE;
 Image ivmg::open(const std::string& imgpath) {
     std::ifstream file(imgpath, std::ios::binary);
 
-    Vec<u8> file_buffer;
+    std::vector<u8> file_buffer;
 
-    auto res = DecoderRegistry::decode(file);
+    auto res = CodecRegistry::decode(file);
     if (res.has_value()) {
         return res.value();
     }

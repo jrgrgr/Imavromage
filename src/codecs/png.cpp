@@ -21,10 +21,11 @@ bool PNG_Decoder::can_decode(std::ifstream& filestream) const {
 
 Image PNG_Decoder::decode(std::ifstream& filestream) {
     filestream.seekg(0, std::ios_base::end);
+
     const size_t len = filestream.tellg();
     filestream.seekg(magic_length);
 
-    Vec<u8> vbuffer;
+    std::vector<u8> vbuffer;
     vbuffer.resize(len - magic_length);
 
     filestream.read(reinterpret_cast<char*>(vbuffer.data()), len - magic_length);
@@ -33,7 +34,7 @@ Image PNG_Decoder::decode(std::ifstream& filestream) {
 }
 
 
-Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
+Image PNG_Decoder::decode_png(std::vector<u8>& file_buffer) {
     // D(std::println("Decoding PNG");)
     Logger::log(LOG_LEVEL::INFO, "Decoding PNG of size {} bytes", file_buffer.size());
     auto start = std::chrono::high_resolution_clock::now();
@@ -41,7 +42,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
     size_t pxl_idx {0};
     ChunkPNG chunk {};
 
-    Vec<u8> rawidat;
+    std::vector<u8> rawidat;
     rawidat.reserve(file_buffer.size());
 
     do {
@@ -87,7 +88,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
 
     // Reverse the filters
     Image img (width, height);
-    
+
     D(
         int n=0;
         int s=0;
@@ -96,7 +97,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
         int p=0;
     )
 
-    
+
     const size_t line_in_size = width * bpp + 1;     // Width of the image + 1 byte for the filter type
     const size_t line_out_size = width * img.nb_channels;
 
@@ -153,7 +154,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
 
                 case PNG_COLOR_TYPE::RGBA:
                 case PNG_COLOR_TYPE::RGB: {
-                    
+
                     for (size_t i = 0; i < scanline.size(); i++) {
                         const auto dest = i + (i / bpp) * in_out_chan_diff;
                         const u8 left = (i < bpp) ? 0 : output_line[dest - img.nb_channels];
@@ -229,11 +230,11 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
                     for (size_t i = 0; i < output_line.size(); i++) {
                         const bool first_pixel = i < bpp;
                         const bool first_scanline = line_id == 0;
-        
+
                         const u8 left = first_pixel ? 0 : output_line[i - img.nb_channels];
                         const u8 up = first_scanline ? 0 : up_line[i];
                         const u8 upleft = (first_pixel || first_scanline) ? 0 : up_line[i - img.nb_channels];
-        
+
                         output_line[i] = this->paeth_predictor(left, up, upleft) + scanline[i];
                     }
 
@@ -260,7 +261,7 @@ Image PNG_Decoder::decode_png(Vec<u8>& file_buffer) {
 
 
 std::optional<std::span<const u8>> PNG_Decoder::get_scanline(std::span<const u8>& data, size_t scanline_size) {
-    if (data.size() == 0) 
+    if (data.size() == 0)
         return std::nullopt;
 
     std::span<const u8> scanline = data.subspan(0, scanline_size);
@@ -272,7 +273,7 @@ std::optional<std::span<const u8>> PNG_Decoder::get_scanline(std::span<const u8>
 
 
 
-ChunkPNG PNG_Decoder::read_chunk(Vec<u8>& data, size_t& idx) {
+ChunkPNG PNG_Decoder::read_chunk(std::vector<u8>& data, size_t& idx) {
     ChunkPNG chunk {};
     chunk.length = read<u32, std::endian::big>(data, idx);
     chunk.type = static_cast<ChunkType>(read<u32, std::endian::big>(data, idx));
