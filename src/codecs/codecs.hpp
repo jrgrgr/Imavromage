@@ -29,7 +29,7 @@ class CodecRegistry {
 private:
 
 	std::vector<std::unique_ptr<Decoder>> decoders;
-	std::vector<std::unique_ptr<Encoder>> encoders;
+	std::unordered_map<std::string, std::unique_ptr<Encoder>> encoders;
 
 	/**
 	 * @brief Function enabling the Meyer's singleton pattern.
@@ -83,36 +83,11 @@ public:
 	 * @tparam T the encoder to register. Must inherit from ivmg::Encoder
 	 */
 	template <class T> requires std::is_base_of_v<Encoder, T>
-	static void register_encoder() {
+	static void register_encoder(const std::string& ext) {
 		CodecRegistry& registry = get_instance();
-		registry.encoders.emplace_back(std::make_unique<T>());
+		registry.encoders.insert_or_assign(ext, std::make_unique<T>());
 	}
 };
-
-
-
-// class DecoderRegistry {
-// private:
-// 	std::vector<std::unique_ptr<Decoder>> decoders;
-
-//         static DecoderRegistry &get_instance();
-
-//       public:
-// 	static ResultOr<Image, IVMG_DEC_ERR> decode(std::ifstream &file) {
-// 		static std::vector<std::unique_ptr<Decoder>> decs;
-
-// 		if (decs.empty()) {
-// 			decs.emplace_back(std::make_unique<PNG_Decoder>());
-// 		}
-
-// 		for (const auto &d : decs) {
-// 			if (d->can_decode(file))
-// 				return d->decode(file);
-// 		}
-
-// 		return std::unexpected(IVMG_DEC_ERR::UNKNOWN_FORMAT);
-// 	}
-// };
 
 
 // Encoder functions registration

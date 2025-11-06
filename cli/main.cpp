@@ -49,9 +49,9 @@ int main(int argc, char** argv) {
     // int si = program.get<int>("--sigma");
 
     ivmg::Image img = ivmg::open(input_file);
-    if (!ivmg::save(img, output_file).has_value()) {
-        std::println(std::cerr, "Error when saving the file");
-    }
+
+    if (!img.save("test_out.pam").has_value())
+    	std::println(std::cerr, "Error when saving the file");
 
 
     // auto s = std::chrono::high_resolution_clock::now();

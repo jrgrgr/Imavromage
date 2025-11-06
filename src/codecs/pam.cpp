@@ -4,6 +4,7 @@
 #include <ivmg/core/image.hpp>
 #include <fstream>
 #include <sstream>
+#include <print>
 
 void ivmg::encode_pam(const Image &img, const std::filesystem::path& outfile) {
     std::ofstream outppm(outfile, std::ios::binary);
@@ -22,6 +23,9 @@ void ivmg::encode_pam(const Image &img, const std::filesystem::path& outfile) {
 
 
 std::vector<uint8_t> ivmg::PAM_Encoder::encode(const Image& img) {
+
+	std::println("Encoding in PAM");
+
 	std::stringstream ss;
 	ss << "P7\n"
         << "WIDTH " << img.width() << "\n"

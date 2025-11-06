@@ -1,8 +1,10 @@
 #include "codecs.hpp"
 #include "ivmg/core/formats.hpp"
+#include "pam.hpp"
 #include "png.hpp"
 #include "utils.hpp"
 #include <expected>
+#include <fstream>
 #include <memory>
 
 namespace ivmg {
@@ -10,7 +12,8 @@ namespace ivmg {
 
 	CodecRegistry::CodecRegistry() {
 		decoders.emplace_back(std::make_unique<PNG_Decoder>());
-		// encoders.emplace_back(std::make_unique<QOI_Encoder>());
+
+		encoders.emplace(".pam", std::make_unique<PAM_Encoder>());
 	}
 
 
@@ -32,7 +35,20 @@ namespace ivmg {
 	}
 
 
+	ResultOr<void, IVMG_ENC_ERR> CodecRegistry::encode(const Image& img, const std::filesystem::path& imgpath) {
+		CodecRegistry& registry = get_instance();
 
+		std::string ext = imgpath.extension();
+
+		if (registry.encoders.contains(ext)) {
+			std::vector<u8> encoded = registry.encoders.at(ext)->encode(img);
+			std::ofstream outfile(imgpath);
+			outfile.write(reinterpret_cast<char*>(encoded.data()), encoded.size());
+			return {};
+		}
+
+		return std::unexpected(IVMG_ENC_ERR::UNSUPPORTED_FORMAT);
+	}
 
 
 }

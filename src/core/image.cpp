@@ -2,9 +2,12 @@
 #include <ivmg/filters/filter.hpp>
 #include <print>
 #include <thread>
+#include "codecs.hpp"
+#include "utils.hpp"
 
 namespace ivmg {
 using namespace filt;
+using namespace types;
 
 Image Image::operator|(const Filter& f) {
 
@@ -67,7 +70,9 @@ Image Image::operator|(const Filter& f) {
 
 }
 
-
+ResultOr<void, IVMG_ENC_ERR> Image::save(const std::filesystem::path& imgpath) {
+	return CodecRegistry::encode(*this, imgpath);
+}
 
 
 }
