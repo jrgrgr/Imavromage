@@ -2,7 +2,6 @@
 #include "ivmg/core/formats.hpp"
 #include "pam.hpp"
 #include "png.hpp"
-#include "utils.hpp"
 #include <expected>
 #include <fstream>
 #include <memory>
@@ -23,7 +22,7 @@ namespace ivmg {
 	}
 
 
-	ResultOr<Image, IVMG_DEC_ERR> CodecRegistry::decode(std::ifstream &file) {
+	std::expected<Image, IVMG_DEC_ERR> CodecRegistry::decode(std::ifstream &file) {
 		CodecRegistry& registry = get_instance();
 
 		for (const auto& dec: registry.decoders) {
@@ -35,13 +34,13 @@ namespace ivmg {
 	}
 
 
-	ResultOr<void, IVMG_ENC_ERR> CodecRegistry::encode(const Image& img, const std::filesystem::path& imgpath) {
+	std::expected<void, IVMG_ENC_ERR> CodecRegistry::encode(const Image& img, const std::filesystem::path& imgpath) {
 		CodecRegistry& registry = get_instance();
 
 		std::string ext = imgpath.extension();
 
 		if (registry.encoders.contains(ext)) {
-			std::vector<u8> encoded = registry.encoders.at(ext)->encode(img);
+			std::vector<uint8_t> encoded = registry.encoders.at(ext)->encode(img);
 			std::ofstream outfile(imgpath);
 			outfile.write(reinterpret_cast<char*>(encoded.data()), encoded.size());
 			return {};

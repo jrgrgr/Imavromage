@@ -1,12 +1,10 @@
 #include <ivmg/ivmg.hpp>
+#include "codecs/codecs.hpp"
 
 #include <fstream>
 #include "logger.hpp"
-#include "codecs/codecs.hpp"
-#include "utils.hpp"
 
 using namespace ivmg;
-using namespace ivmg::types;
 
 enum class Formats;
 
@@ -15,7 +13,7 @@ LOG_LEVEL Logger::level = LOG_LEVEL::NONE;
 Image ivmg::open(const std::string& imgpath) {
     std::ifstream file(imgpath, std::ios::binary);
 
-    std::vector<u8> file_buffer;
+    std::vector<uint8_t> file_buffer;
 
     auto res = CodecRegistry::decode(file);
     if (res.has_value()) {

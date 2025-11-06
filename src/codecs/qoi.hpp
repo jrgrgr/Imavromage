@@ -1,45 +1,43 @@
 #pragma once
 
-#include <ivmg/core/image.hpp>
-#include "utils.hpp"
-#include <cassert>
+#include <cstddef>
+#include <cstdint>
 #include <filesystem>
-
 
 namespace ivmg {
 
-using namespace types;
+class Image;
 
-struct qoi_color_t { 
-    u8 r, g, b, a; 
+struct qoi_color_t {
+    uint8_t r, g, b, a;
     bool operator==(const qoi_color_t& other) const {
         return (r == other.r) && (g == other.g) && (b == other.b) && (a == other.a);
     }
 };
 
-struct qoi_diff_t { i8 r, g, b; };
+struct qoi_diff_t { int8_t r, g, b; };
 
-enum class QOI_COLORSPACE: u8 {
+enum class QOI_COLORSPACE: uint8_t {
     SRGB = 0,
     LINEAR = 1
 };
 
 // QOI chunks initialized. Tags are set but without data
-const u8 QOI_OP_RGB   =  0xFE;     // 8 bits tag
-const u8 QOI_OP_RGBA  =  0xFF;     // 8 bits tag
-const u8 QOI_OP_LUMA  =  0x80;     // 2 bits tag
-const u8 QOI_OP_INDEX =  0x00;     // 2 bits tag
-const u8 QOI_OP_DIFF  =  0x40;     // 2 bits tag
-const u8 QOI_OP_RUN   =  0xC0;     // 2 bits tag
+const uint8_t QOI_OP_RGB   =  0xFE;     // 8 bits tag
+const uint8_t QOI_OP_RGBA  =  0xFF;     // 8 bits tag
+const uint8_t QOI_OP_LUMA  =  0x80;     // 2 bits tag
+const uint8_t QOI_OP_INDEX =  0x00;     // 2 bits tag
+const uint8_t QOI_OP_DIFF  =  0x40;     // 2 bits tag
+const uint8_t QOI_OP_RUN   =  0xC0;     // 2 bits tag
 
 
-const u8 QOI_MASK_2   =  0xC0;
+const uint8_t QOI_MASK_2   =  0xC0;
 
 struct qoi_header {
-    u8 magic[4] = {'q', 'o', 'i', 'f'};
-    u32 width;             // image width in pixels (BE)
-    u32 height;            // image height in pixels (BE)
-    u8 channels;          // 3 = RGB, 4 = RGBA
+    uint8_t magic[4] = {'q', 'o', 'i', 'f'};
+    uint32_t width;             // image width in pixels (BE)
+    uint32_t height;            // image height in pixels (BE)
+    uint8_t channels;          // 3 = RGB, 4 = RGBA
     QOI_COLORSPACE colorspace;        // 0 = sRGB with linear alpha | 1 = all channels linear
 } __attribute__((packed));
 

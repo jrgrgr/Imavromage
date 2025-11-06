@@ -1,30 +1,8 @@
 #pragma once
 
 #include "logger.hpp"
-#include <expected>
 #include <cstring>
 
-namespace ivmg::types {
-
-template <typename T, typename E>
-using ResultOr = std::expected<T, E>;
-
-using i8 = int8_t;
-using i16 = int16_t;
-using i32 = int32_t;
-using i64 = int64_t;
-
-using u8 = uint8_t;
-using u16 = uint16_t;
-using u32 = uint32_t;
-using u64 = uint64_t;
-
-using f32 = float;
-using f64 = double;
-
-}
-
-using namespace ivmg::types;
 
 
 /**
@@ -40,7 +18,7 @@ using namespace ivmg::types;
  */
 template <typename T, std::endian ordering = std::endian::little>
 requires std::is_trivially_copyable_v<T>
-T read(std::span<const u8> data, size_t& idx) {
+T read(std::span<const uint8_t> data, size_t& idx) {
     T dest;
 
     size_t read_size_attempt = sizeof(T);

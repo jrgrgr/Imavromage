@@ -1,9 +1,12 @@
-#include "logger.hpp"
+#include <ivmg/core/image.hpp>
+#include <libdeflate.h>
 #include "png.hpp"
+#include "logger.hpp"
+#include "macros.hpp"
+#include "utils.hpp"
+
 #include <chrono>
 #include <cstring>
-#include <libdeflate.h>
-#include <ivmg/core/image.hpp>
 #include <optional>
 
 namespace ivmg {
@@ -25,7 +28,7 @@ Image PNG_Decoder::decode(std::ifstream& filestream) {
     const size_t len = filestream.tellg();
     filestream.seekg(magic_length);
 
-    std::vector<u8> vbuffer;
+    std::vector<uint8_t> vbuffer;
     vbuffer.resize(len - magic_length);
 
     filestream.read(reinterpret_cast<char*>(vbuffer.data()), len - magic_length);
@@ -34,7 +37,7 @@ Image PNG_Decoder::decode(std::ifstream& filestream) {
 }
 
 
-Image PNG_Decoder::decode_png(std::vector<u8>& file_buffer) {
+Image PNG_Decoder::decode_png(std::vector<uint8_t>& file_buffer) {
     // D(std::println("Decoding PNG");)
     Logger::log(LOG_LEVEL::INFO, "Decoding PNG of size {} bytes", file_buffer.size());
     auto start = std::chrono::high_resolution_clock::now();
@@ -42,13 +45,13 @@ Image PNG_Decoder::decode_png(std::vector<u8>& file_buffer) {
     size_t pxl_idx {0};
     ChunkPNG chunk {};
 
-    std::vector<u8> rawidat;
+    std::vector<uint8_t> rawidat;
     rawidat.reserve(file_buffer.size());
 
     do {
         chunk = this->read_chunk(file_buffer, pxl_idx);
 
-        Logger::log(LOG_LEVEL::INFO, "Got chunk {:#x} of length {} bytes", static_cast<u32>(chunk.type), chunk.length);
+        Logger::log(LOG_LEVEL::INFO, "Got chunk {:#x} of length {} bytes", static_cast<uint32_t>(chunk.type), chunk.length);
 
         switch (chunk.type) {
 
@@ -101,25 +104,25 @@ Image PNG_Decoder::decode_png(std::vector<u8>& file_buffer) {
     const size_t line_in_size = width * bpp + 1;     // Width of the image + 1 byte for the filter type
     const size_t line_out_size = width * img.nb_channels;
 
-    u16 line_id = 0;
+    uint16_t line_id = 0;
 
-    std::span<const u8> data_view(inflated_data);
+    std::span<const uint8_t> data_view(inflated_data);
     auto res = get_scanline(data_view, line_in_size);
 
-    const u8 in_out_chan_diff = img.nb_channels - bpp;
+    const uint8_t in_out_chan_diff = img.nb_channels - bpp;
 
     while (res.has_value()) {
-        std::span<const u8> scanline = res.value();
+        std::span<const uint8_t> scanline = res.value();
 
         PNG_FILT_TYPE filt = static_cast<PNG_FILT_TYPE>(scanline[0]);
         scanline = scanline.subspan(1, scanline.size()-1);
 
-        u8 *start = img.get_raw_handle() + (line_id * line_out_size);
-        u8 *up_start = start - line_out_size;
-        u8 *end = start + line_out_size;
+        uint8_t *start = img.get_raw_handle() + (line_id * line_out_size);
+        uint8_t *up_start = start - line_out_size;
+        uint8_t *end = start + line_out_size;
 
-        std::span<u8> output_line(start, end);
-        std::span<const u8> up_line(up_start, up_start + line_out_size);    // May contain garbage data for line_id = 0
+        std::span<uint8_t> output_line(start, end);
+        std::span<const uint8_t> up_line(up_start, up_start + line_out_size);    // May contain garbage data for line_id = 0
 
         switch (filt) {
 
@@ -157,7 +160,7 @@ Image PNG_Decoder::decode_png(std::vector<u8>& file_buffer) {
 
                     for (size_t i = 0; i < scanline.size(); i++) {
                         const auto dest = i + (i / bpp) * in_out_chan_diff;
-                        const u8 left = (i < bpp) ? 0 : output_line[dest - img.nb_channels];
+                        const uint8_t left = (i < bpp) ? 0 : output_line[dest - img.nb_channels];
                         output_line[dest] = left + scanline[i];
                     }
 
@@ -231,9 +234,9 @@ Image PNG_Decoder::decode_png(std::vector<u8>& file_buffer) {
                         const bool first_pixel = i < bpp;
                         const bool first_scanline = line_id == 0;
 
-                        const u8 left = first_pixel ? 0 : output_line[i - img.nb_channels];
-                        const u8 up = first_scanline ? 0 : up_line[i];
-                        const u8 upleft = (first_pixel || first_scanline) ? 0 : up_line[i - img.nb_channels];
+                        const uint8_t left = first_pixel ? 0 : output_line[i - img.nb_channels];
+                        const uint8_t up = first_scanline ? 0 : up_line[i];
+                        const uint8_t upleft = (first_pixel || first_scanline) ? 0 : up_line[i - img.nb_channels];
 
                         output_line[i] = this->paeth_predictor(left, up, upleft) + scanline[i];
                     }
@@ -260,11 +263,11 @@ Image PNG_Decoder::decode_png(std::vector<u8>& file_buffer) {
 
 
 
-std::optional<std::span<const u8>> PNG_Decoder::get_scanline(std::span<const u8>& data, size_t scanline_size) {
+std::optional<std::span<const uint8_t>> PNG_Decoder::get_scanline(std::span<const uint8_t>& data, size_t scanline_size) {
     if (data.size() == 0)
         return std::nullopt;
 
-    std::span<const u8> scanline = data.subspan(0, scanline_size);
+    std::span<const uint8_t> scanline = data.subspan(0, scanline_size);
     data = data.subspan(scanline_size, data.size() - scanline_size);
 
     return scanline;
@@ -273,39 +276,39 @@ std::optional<std::span<const u8>> PNG_Decoder::get_scanline(std::span<const u8>
 
 
 
-ChunkPNG PNG_Decoder::read_chunk(std::vector<u8>& data, size_t& idx) {
+ChunkPNG PNG_Decoder::read_chunk(std::vector<uint8_t>& data, size_t& idx) {
     ChunkPNG chunk {};
-    chunk.length = read<u32, std::endian::big>(data, idx);
-    chunk.type = static_cast<ChunkType>(read<u32, std::endian::big>(data, idx));
-    chunk.data = std::span<u8>(data.begin() + idx, chunk.length);
+    chunk.length = read<uint32_t, std::endian::big>(data, idx);
+    chunk.type = static_cast<ChunkType>(read<uint32_t, std::endian::big>(data, idx));
+    chunk.data = std::span<uint8_t>(data.begin() + idx, chunk.length);
     idx += chunk.length;
-    chunk.crc = read<u32, std::endian::big>(data, idx);
+    chunk.crc = read<uint32_t, std::endian::big>(data, idx);
 
     return chunk;
 }
 
 
 
-void PNG_Decoder::decode_ihdr(std::span<u8> data) {
+void PNG_Decoder::decode_ihdr(std::span<uint8_t> data) {
     size_t idx {0};
-    width = read<u32, std::endian::big>(data, idx);
-    height = read<u32, std::endian::big>(data, idx);
-    bit_depth = read<u8, std::endian::big>(data, idx);
-    color_type = static_cast<PNG_COLOR_TYPE>(read<u8>(data, idx));
-    compression_method = read<u8>(data, idx);
-    filter_method = read<u8>(data, idx);
-    interlace_method = read<u8>(data, idx);
+    width = read<uint32_t, std::endian::big>(data, idx);
+    height = read<uint32_t, std::endian::big>(data, idx);
+    bit_depth = read<uint8_t, std::endian::big>(data, idx);
+    color_type = static_cast<PNG_COLOR_TYPE>(read<uint8_t>(data, idx));
+    compression_method = read<uint8_t>(data, idx);
+    filter_method = read<uint8_t>(data, idx);
+    interlace_method = read<uint8_t>(data, idx);
     bpp = channel_nb.at(color_type) * bit_depth / 8;
     inflated_data.resize(height * width * bpp + height);
 }
 
 
 
-u8 PNG_Decoder::paeth_predictor(u8 a, u8 b, u8 c) {
-    const i16 p = a + b - c;
-    const i16 pa = std::abs(p - a);
-    const i16 pb = std::abs(p - b);
-    const i16 pc = std::abs(p - c);
+uint8_t PNG_Decoder::paeth_predictor(uint8_t a, uint8_t b, uint8_t c) {
+    const int16_t p = a + b - c;
+    const int16_t pa = std::abs(p - a);
+    const int16_t pb = std::abs(p - b);
+    const int16_t pc = std::abs(p - c);
 
     if (pa <= pb && pa <= pc) return a;
     else if (pb <= pc) return b;

@@ -2,7 +2,6 @@
 
 #include "ivmg/core/formats.hpp"
 #include <cstdint>
-#include <unordered_map>
 #include <vector>
 #include <filesystem>
 #include <expected>

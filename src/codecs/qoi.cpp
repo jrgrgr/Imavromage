@@ -1,10 +1,13 @@
 #include "qoi.hpp"
 #include "core/common.hpp"
+#include <ivmg/core/image.hpp>
+
+
+#include <print>
 #include <array>
 #include <bit>
 #include <cstddef>
 #include <cstring>
-#include <filesystem>
 #include <fstream>
 
 using namespace ivmg;
@@ -28,7 +31,7 @@ void ivmg::encode_qoi(const Image &img, const std::filesystem::path &outfile) {
 
     std::array<qoi_color_t, 64> color_cache {};
 
-    std::vector<u8> test(img.width() * img.height() * img.nb_channels + sizeof(hdr) + 8);
+    std::vector<uint8_t> test(img.width() * img.height() * img.nb_channels + sizeof(hdr) + 8);
 
     size_t p = 0;
     std::memcpy(test.data(), &hdr, sizeof(hdr));
@@ -69,8 +72,8 @@ void ivmg::encode_qoi(const Image &img, const std::filesystem::path &outfile) {
 
                 if (cur_pxl.a == prev_pxl.a) {
                     const qoi_diff_t diff = QOI_COLOR_DIFF(cur_pxl, prev_pxl);
-                    const i8 dr_dg = diff.r - diff.g;
-                    const i8 db_dg = diff.b - diff.g;
+                    const int8_t dr_dg = diff.r - diff.g;
+                    const int8_t db_dg = diff.b - diff.g;
 
                     if (
                         diff.r >= -2 && diff.r <= 1 &&
@@ -130,9 +133,9 @@ void ivmg::encode_qoi(const Image &img, const std::filesystem::path &outfile) {
 }
 
 constexpr qoi_diff_t ivmg::QOI_COLOR_DIFF(const qoi_color_t &c1, const qoi_color_t &c2) {
-    i8 r = c1.r - c2.r;
-    i8 g = c1.g - c2.g;
-    i8 b = c1.b - c2.b;
+    int8_t r = c1.r - c2.r;
+    int8_t g = c1.g - c2.g;
+    int8_t b = c1.b - c2.b;
 
     return { r, g, b };
 }

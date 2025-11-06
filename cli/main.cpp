@@ -1,10 +1,8 @@
 #include "argparse.hpp"
+
 #include <iostream>
 #include <ivmg/filters/gaussian_blur.hpp>
 #include <ivmg/ivmg.hpp>
-#include <ivmg/core/image.hpp>
-#include <ivmg/core/formats.hpp>
-#include <getopt.h>
 #include <print>
 
 

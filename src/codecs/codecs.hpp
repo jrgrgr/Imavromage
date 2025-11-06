@@ -1,17 +1,12 @@
 #pragma once
 
-#include <filesystem>
+#include <ivmg/core/image.hpp>
+#include "qoi.hpp"
+
 #include <fstream>
 #include <functional>
-#include <ivmg/core/image.hpp>
-#include <ivmg/core/formats.hpp>
-#include <unordered_map>
 
-#include "qoi.hpp"
-#include "pam.hpp"
-#include "utils.hpp"
 
-using namespace ivmg::types;
 
 namespace ivmg {
 
@@ -51,7 +46,7 @@ public:
 	 * @param file the binary stream of the image file to decode
 	 * @return std::expected with the decoded image as the expected value, an error code otherwise
 	 */
-	static ResultOr<Image, IVMG_DEC_ERR> decode(std::ifstream& file);
+	static std::expected<Image, IVMG_DEC_ERR> decode(std::ifstream& file);
 
 
 	/**
@@ -62,7 +57,7 @@ public:
 	 * @param imgpath the file to encode the image to
 	 * @return std::expected with void as the expected value, an error code otherwise
 	 */
-	static ResultOr<void, IVMG_ENC_ERR> encode(const Image& img, const std::filesystem::path& imgpath);
+	static std::expected<void, IVMG_ENC_ERR> encode(const Image& img, const std::filesystem::path& imgpath);
 
 
 	/**
@@ -94,7 +89,6 @@ public:
 typedef std::function<void(const Image&, const std::filesystem::path&)> Encoder_fn;
 const std::unordered_map<Formats, Encoder_fn> encoders = {
 	{ Formats::QOI, encode_qoi },
-	{ Formats::PAM, encode_pam }
 };
 
 }

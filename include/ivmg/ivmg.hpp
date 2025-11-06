@@ -1,7 +1,6 @@
 #pragma once
 
-#include <filesystem>
-#include <expected>
+#include "core/image.hpp"
 
 namespace ivmg {
 
