@@ -82,11 +82,4 @@ public:
 	}
 };
 
-
-// Encoder functions registration
-typedef std::function<void(const Image&, const std::filesystem::path&)> Encoder_fn;
-const std::unordered_map<Formats, Encoder_fn> encoders = {
-	{ Formats::QOI, encode_qoi },
-};
-
 }
