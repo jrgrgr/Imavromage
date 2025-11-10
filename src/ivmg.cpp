@@ -30,17 +30,3 @@ Image ivmg::open(const std::string& imgpath) {
     Logger::log(LOG_LEVEL::ERROR, "Unknown format");
     exit(1);
 };
-
-
-
-std::expected<void, IVMG_ENC_ERR> ivmg::save(const Image &img, const std::filesystem::path &imgpath) {
-
-    Formats target = ext_to_format.at(imgpath.extension());
-
-    if (encoders.contains(target)) {
-        encoders.at(target)(img, imgpath);
-        return {};
-    }
-    else
-        return std::unexpected(IVMG_ENC_ERR::UNSUPPORTED_FORMAT);
-}

@@ -48,8 +48,6 @@ int main(int argc, char** argv) {
 
     ivmg::Image img = ivmg::open(input_file);
 
-    ivmg::save(img, "resources/ref.qoi");
-
     img.save("resources/ref.pam");
 
 
