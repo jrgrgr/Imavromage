@@ -2,6 +2,7 @@
 #include "ivmg/core/formats.hpp"
 #include "pam.hpp"
 #include "png.hpp"
+#include "qoi.hpp"
 #include <expected>
 #include <fstream>
 #include <memory>
@@ -13,6 +14,7 @@ namespace ivmg {
 		decoders.emplace_back(std::make_unique<PNG_Decoder>());
 
 		encoders.emplace(".pam", std::make_unique<PAM_Encoder>());
+		encoders.emplace(".qoi", std::make_unique<QOI_Encoder>());
 	}
 
 

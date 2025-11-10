@@ -48,7 +48,12 @@ int main(int argc, char** argv) {
 
     ivmg::Image img = ivmg::open(input_file);
 
-    if (!img.save("test_out.pam").has_value())
+    ivmg::save(img, "resources/ref.qoi");
+
+    img.save("resources/ref.pam");
+
+
+    if (!img.save(output_file).has_value())
     	std::println(std::cerr, "Error when saving the file");
 
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ivmg/codecs/encoder.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -45,6 +46,35 @@ struct qoi_header {
 void encode_qoi(const Image& img, const std::filesystem::path& outfile);
 constexpr qoi_diff_t QOI_COLOR_DIFF(const qoi_color_t& c1, const qoi_color_t& c2);
 constexpr size_t QOI_PIXEL_HASH(const qoi_color_t& c);
+
+
+
+
+
+class QOI_Encoder: public Encoder {
+private:
+	// File metadata
+	static constexpr size_t hdr_size = 14;
+	static constexpr uint32_t magic = 0x716F6966;
+	static constexpr std::array<char, 8> end_marker {0,0,0,0,0,0,0,1};
+	uint8_t channels = 4;
+	QOI_COLORSPACE colorspace = QOI_COLORSPACE::SRGB;
+
+	std::array<qoi_color_t, 64> color_cache {};
+	std::vector<uint8_t> encoded_data;
+	qoi_color_t prev_pxl { 0, 0, 0, 255 };
+	uint16_t run = 0;
+	size_t ptr = 0;
+
+	// Helpers
+	static uint16_t hash_pixel(const qoi_color_t& c);
+	static qoi_diff_t color_diff(const qoi_color_t& c1, const qoi_color_t& c2);
+
+public:
+	QOI_Encoder() = default;
+	std::vector<uint8_t> encode(const Image& img) override;
+};
+
 
 
 

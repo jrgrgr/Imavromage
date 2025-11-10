@@ -6,8 +6,6 @@
 #include <fstream>
 #include <functional>
 
-
-
 namespace ivmg {
 
 class Encoder;

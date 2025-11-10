@@ -70,7 +70,7 @@ private:
     std::vector<uint8_t> inflated_data;
 
 public:
-    inline PNG_Decoder(): Decoder() {};
+    PNG_Decoder() = default;
     bool can_decode(std::ifstream& filestream) const override;
     Image decode(std::ifstream& filestream) override;
 
