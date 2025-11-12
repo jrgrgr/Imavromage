@@ -1,12 +1,13 @@
-#include "pam.hpp"
-#include <cstdint>
-#include <cstring>
 #include <ivmg/core/image.hpp>
+
+#include "pam.hpp"
+
+#include <cstring>
 #include <sstream>
 #include <print>
 
 
-std::vector<uint8_t> ivmg::PAM_Encoder::encode(const Image& img) {
+std::vector<uint8_t> ivmg::PamEncoder::encode(const Image& img) {
 
 	std::println("Encoding in PAM");
 

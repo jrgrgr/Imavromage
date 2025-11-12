@@ -1,8 +1,6 @@
 #include <ivmg/ivmg.hpp>
-#include "codecs/codecs.hpp"
-
-#include <fstream>
-#include "logger.hpp"
+#include <ivmg/codecs/codecs.hpp>
+#include "common/logger.hpp"
 
 using namespace ivmg;
 

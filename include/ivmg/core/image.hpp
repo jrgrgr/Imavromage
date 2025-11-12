@@ -1,15 +1,16 @@
 #pragma once
 
-#include "ivmg/core/formats.hpp"
-#include <cstdint>
+#include <ivmg/codecs/errors.hpp>
+#include <ivmg/imgproc/filter.hpp>
+
 #include <vector>
 #include <filesystem>
 #include <expected>
+#include <unordered_map>
 
 namespace ivmg {
 
-namespace filt { class Filter; }
-using namespace filt;
+using namespace imgproc::filt;
 
 enum class ColorType : uint8_t {
     RGBA = 0,
@@ -61,7 +62,7 @@ class Image {
         std::expected<void, IVMG_ENC_ERR> save(const std::filesystem::path& imgpath);
 
 
-        Image operator|(const Filter& f);
+        Image operator|(const Conv& f);
 
 
 };

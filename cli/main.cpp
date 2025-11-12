@@ -1,8 +1,9 @@
 #include "argparse.hpp"
 
-#include <iostream>
-#include <ivmg/filters/gaussian_blur.hpp>
 #include <ivmg/ivmg.hpp>
+#include <ivmg/imgproc/gaussian_blur.hpp>
+
+#include <iostream>
 #include <print>
 
 
@@ -47,8 +48,6 @@ int main(int argc, char** argv) {
     // int si = program.get<int>("--sigma");
 
     ivmg::Image img = ivmg::open(input_file);
-
-    img.save("resources/ref.pam");
 
 
     if (!img.save(output_file).has_value())

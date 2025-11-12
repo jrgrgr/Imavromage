@@ -5,16 +5,16 @@
 #include <cstddef>
 #include "math.h"
 
-namespace ivmg::filt {
+namespace ivmg::imgproc::filt {
 
 
-class GaussianBlur: public Filter {
+class GaussianBlur: public Conv {
 
 private:
     double s;
 
 public:
-    GaussianBlur(uint8_t ks, double sigma = 0.0): Filter(ks), s(sigma) {
+    GaussianBlur(uint8_t ks, double sigma = 0.0): Conv(ks), s(sigma) {
 
         if (s == 0.0) s = std::max(ksize / 2.0, 1.0);
 

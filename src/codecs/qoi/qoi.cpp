@@ -1,21 +1,17 @@
-#include "qoi.hpp"
-#include "core/common.hpp"
-#include <cstdint>
 #include <ivmg/core/image.hpp>
+#include "qoi.hpp"
+#include "common/utils.hpp"
 
-#include <print>
 #include <array>
-#include <cstddef>
-#include <cstring>
 
 
 namespace ivmg {
 
-uint16_t QOI_Encoder::hash_pixel(const qoi_color_t& c) {
+uint16_t QoiEncoder::hash_pixel(const qoi_color_t& c) {
 	return (c.r * 3 + c.g * 5 + c.b * 7 + c.a * 11) & 63;
 }
 
-qoi_diff_t QOI_Encoder::color_diff(const qoi_color_t &c1, const qoi_color_t &c2) {
+qoi_diff_t QoiEncoder::color_diff(const qoi_color_t &c1, const qoi_color_t &c2) {
     int8_t r = c1.r - c2.r;
     int8_t g = c1.g - c2.g;
     int8_t b = c1.b - c2.b;
@@ -24,10 +20,10 @@ qoi_diff_t QOI_Encoder::color_diff(const qoi_color_t &c1, const qoi_color_t &c2)
 }
 
 
-std::vector<uint8_t> QOI_Encoder::encode(const Image& img) {
+std::vector<uint8_t> QoiEncoder::encode(const Image& img) {
 	std::println("Encoding in QOI");
 
-	std::vector<uint8_t> out(img.size_bytes() + QOI_Encoder::hdr_size + 8);
+	std::vector<uint8_t> out(img.size_bytes() + QoiEncoder::hdr_size + 8);
 
 	auto write32 = [&] (uint32_t val) {
 		out.at(ptr++) = (0xff000000 & val) >> 24;

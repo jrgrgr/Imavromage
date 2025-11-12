@@ -2,7 +2,6 @@
 
 #include "ivmg/codecs/encoder.hpp"
 #include <cstddef>
-#include <cstdint>
 #include <filesystem>
 
 namespace ivmg {
@@ -51,7 +50,7 @@ constexpr size_t QOI_PIXEL_HASH(const qoi_color_t& c);
 
 
 
-class QOI_Encoder: public Encoder {
+class QoiEncoder: public Encoder {
 private:
 	// File metadata
 	static constexpr size_t hdr_size = 14;
@@ -71,7 +70,7 @@ private:
 	static qoi_diff_t color_diff(const qoi_color_t& c1, const qoi_color_t& c2);
 
 public:
-	QOI_Encoder() = default;
+	QoiEncoder() = default;
 	std::vector<uint8_t> encode(const Image& img) override;
 };
 

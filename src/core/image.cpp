@@ -1,20 +1,21 @@
 #include <ivmg/core/image.hpp>
-#include <ivmg/filters/filter.hpp>
+#include <ivmg/imgproc/filter.hpp>
+#include <ivmg/codecs/codecs.hpp>
+
 #include <print>
 #include <thread>
-#include "codecs.hpp"
 
 namespace ivmg {
-using namespace filt;
+using namespace imgproc::filt;
 
-Image Image::operator|(const Filter& f) {
+Image Image::operator|(const Conv& f) {
 
     Image out { w, h };
     const size_t num_threads = std::thread::hardware_concurrency();
     const size_t pixels_per_thread = (w * h) / num_threads;
 
 
-    auto convolve_scalar_worker = [] (const Image& img, const Filter& filter, Image& out, size_t start_pxl, size_t end_pxl) {
+    auto convolve_scalar_worker = [] (const Image& img, const Conv& filter, Image& out, size_t start_pxl, size_t end_pxl) {
 
         std::vector<float> pxl_tmp(img.nb_channels);
 

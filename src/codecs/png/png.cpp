@@ -1,17 +1,18 @@
 #include <ivmg/core/image.hpp>
 #include <libdeflate.h>
-#include "png.hpp"
-#include "logger.hpp"
-#include "macros.hpp"
-#include "utils.hpp"
+
+#include "png/png.hpp"
+
+#include "../common/logger.hpp"
+#include "../common/macros.hpp"
+#include "../common/utils.hpp"
 
 #include <chrono>
-#include <cstring>
 #include <optional>
 
 namespace ivmg {
 
-bool PNG_Decoder::can_decode(std::ifstream& filestream) const {
+bool PngDecoder::can_decode(std::ifstream& filestream) const {
     auto startpos = filestream.tellg();
     char buffer[magic_length] = {0};
     if (filestream.read(buffer, magic_length) && !filestream.fail() && std::memcmp(buffer, magic, magic_length) == 0) {
@@ -22,7 +23,7 @@ bool PNG_Decoder::can_decode(std::ifstream& filestream) const {
 }
 
 
-Image PNG_Decoder::decode(std::ifstream& filestream) {
+Image PngDecoder::decode(std::ifstream& filestream) {
     filestream.seekg(0, std::ios_base::end);
 
     const size_t len = filestream.tellg();
@@ -37,7 +38,7 @@ Image PNG_Decoder::decode(std::ifstream& filestream) {
 }
 
 
-Image PNG_Decoder::decode_png(std::vector<uint8_t>& file_buffer) {
+Image PngDecoder::decode_png(std::vector<uint8_t>& file_buffer) {
     // D(std::println("Decoding PNG");)
     Logger::log(LOG_LEVEL::INFO, "Decoding PNG of size {} bytes", file_buffer.size());
     auto start = std::chrono::high_resolution_clock::now();
@@ -243,6 +244,23 @@ Image PNG_Decoder::decode_png(std::vector<uint8_t>& file_buffer) {
 
                     break;
                 }
+                case PNG_COLOR_TYPE::RGB: {
+
+                    for (size_t i = 0; i < output_line.size(); i++) {
+                        const bool first_pixel = i < bpp;
+                        const bool first_scanline = line_id == 0;
+                        const size_t j = i / bpp;
+
+                        const uint8_t left = first_pixel ? 0 : output_line[i - img.nb_channels];
+                        const uint8_t up = first_scanline ? 0 : up_line[i];
+                        const uint8_t upleft = (first_pixel || first_scanline) ? 0 : up_line[i - img.nb_channels];
+
+                        output_line[i + j] = this->paeth_predictor(left, up, upleft) + scanline[i];
+                    }
+
+                    break;
+                }
+
 
                 default:
                     break;
@@ -263,7 +281,7 @@ Image PNG_Decoder::decode_png(std::vector<uint8_t>& file_buffer) {
 
 
 
-std::optional<std::span<const uint8_t>> PNG_Decoder::get_scanline(std::span<const uint8_t>& data, size_t scanline_size) {
+std::optional<std::span<const uint8_t>> PngDecoder::get_scanline(std::span<const uint8_t>& data, size_t scanline_size) {
     if (data.size() == 0)
         return std::nullopt;
 
@@ -276,7 +294,7 @@ std::optional<std::span<const uint8_t>> PNG_Decoder::get_scanline(std::span<cons
 
 
 
-ChunkPNG PNG_Decoder::read_chunk(std::vector<uint8_t>& data, size_t& idx) {
+ChunkPNG PngDecoder::read_chunk(std::vector<uint8_t>& data, size_t& idx) {
     ChunkPNG chunk {};
     chunk.length = read<uint32_t, std::endian::big>(data, idx);
     chunk.type = static_cast<ChunkType>(read<uint32_t, std::endian::big>(data, idx));
@@ -289,7 +307,7 @@ ChunkPNG PNG_Decoder::read_chunk(std::vector<uint8_t>& data, size_t& idx) {
 
 
 
-void PNG_Decoder::decode_ihdr(std::span<uint8_t> data) {
+void PngDecoder::decode_ihdr(std::span<uint8_t> data) {
     size_t idx {0};
     width = read<uint32_t, std::endian::big>(data, idx);
     height = read<uint32_t, std::endian::big>(data, idx);
@@ -304,7 +322,7 @@ void PNG_Decoder::decode_ihdr(std::span<uint8_t> data) {
 
 
 
-uint8_t PNG_Decoder::paeth_predictor(uint8_t a, uint8_t b, uint8_t c) {
+uint8_t PngDecoder::paeth_predictor(uint8_t a, uint8_t b, uint8_t c) {
     const int16_t p = a + b - c;
     const int16_t pa = std::abs(p - a);
     const int16_t pb = std::abs(p - b);

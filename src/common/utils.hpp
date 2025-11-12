@@ -4,6 +4,9 @@
 #include <cstring>
 
 
+constexpr uint8_t BYTE_PER_PIXEL = 4;  // 4 channels @ 8 bits
+
+
 
 /**
  *   @brief Function to read any fundamental and trivially copyable

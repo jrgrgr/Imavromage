@@ -1,13 +1,19 @@
 #pragma once
 
-#include <ivmg/core/image.hpp>
-#include "qoi.hpp"
+
+#include <ivmg/codecs/errors.hpp>
 
 #include <fstream>
+#include <unordered_map>
+#include <memory>
+#include <expected>
+#include <vector>
+#include <filesystem>
 #include <functional>
 
 namespace ivmg {
 
+class Image;
 class Encoder;
 class Decoder;
 
@@ -16,13 +22,16 @@ class Decoder;
  * in a Meyer's singleton pattern.
  *
  * Contains a std::vector of Decoder objects
- * Contains a std::vector of Encoder objects
+ * Contains a map of string to Encoder objects
  */
 class CodecRegistry {
 private:
 
-	std::vector<std::unique_ptr<Decoder>> decoders;
-	std::unordered_map<std::string, std::unique_ptr<Encoder>> encoders;
+	using DecoderFactory = std::function<std::unique_ptr<Decoder>()>;
+	using EncoderFactory = std::function<std::unique_ptr<Encoder>()>;
+
+	std::vector<DecoderFactory> decoders;
+	std::unordered_map<std::string, EncoderFactory> encoders;
 
 	/**
 	 * @brief Function enabling the Meyer's singleton pattern.
@@ -66,7 +75,7 @@ public:
 	template <class T> requires std::is_base_of_v<Decoder, T>
 	static void register_decoder() {
 		CodecRegistry& registry = get_instance();
-		registry.decoders.emplace_back(std::make_unique<T>());
+		registry.decoders.emplace_back([]() { return std::make_unique<T>(); });
 	}
 
 
@@ -78,7 +87,7 @@ public:
 	template <class T> requires std::is_base_of_v<Encoder, T>
 	static void register_encoder(const std::string& ext) {
 		CodecRegistry& registry = get_instance();
-		registry.encoders.insert_or_assign(ext, std::make_unique<T>());
+		registry.encoders.insert_or_assign(ext, []() { return std::make_unique<T>(); });
 	}
 };
 

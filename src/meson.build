@@ -1,9 +1,9 @@
 src_files = [
 	'ivmg.cpp',
 	'codecs/codecs.cpp',
-	'codecs/pam.cpp',
-	'codecs/png.cpp',
-	'codecs/qoi.cpp',
+	'codecs/pam/pam.cpp',
+	'codecs/png/png.cpp',
+	'codecs/qoi/qoi.cpp',
 	'core/image.cpp',
 ]
 

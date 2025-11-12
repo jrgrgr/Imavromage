@@ -1,20 +1,19 @@
-#include "codecs.hpp"
-#include "ivmg/core/formats.hpp"
-#include "pam.hpp"
-#include "png.hpp"
-#include "qoi.hpp"
-#include <expected>
-#include <fstream>
-#include <memory>
+#include <ivmg/codecs/codecs.hpp>
+#include <ivmg/core/image.hpp>
+
+#include "pam/pam.hpp"
+#include "png/png.hpp"
+#include "qoi/qoi.hpp"
+
 
 namespace ivmg {
 
 
 	CodecRegistry::CodecRegistry() {
-		decoders.emplace_back(std::make_unique<PNG_Decoder>());
+		decoders.emplace_back([]() { return std::make_unique<PngDecoder>(); });
 
-		encoders.emplace(".pam", std::make_unique<PAM_Encoder>());
-		encoders.emplace(".qoi", std::make_unique<QOI_Encoder>());
+		encoders.emplace(".pam", []() { return std::make_unique<PamEncoder>(); });
+		encoders.emplace(".qoi", []() { return std::make_unique<QoiEncoder>(); });
 	}
 
 
@@ -27,7 +26,8 @@ namespace ivmg {
 	std::expected<Image, IVMG_DEC_ERR> CodecRegistry::decode(std::ifstream &file) {
 		CodecRegistry& registry = get_instance();
 
-		for (const auto& dec: registry.decoders) {
+		for (const auto& factory: registry.decoders) {
+			std::unique_ptr<Decoder> dec = factory();
 			if (dec->can_decode(file))
 				return dec->decode(file);
 		}
@@ -42,7 +42,8 @@ namespace ivmg {
 		std::string ext = imgpath.extension();
 
 		if (registry.encoders.contains(ext)) {
-			std::vector<uint8_t> encoded = registry.encoders.at(ext)->encode(img);
+			std::unique_ptr<Encoder> enc = registry.encoders.at(ext)();
+			std::vector<uint8_t> encoded = enc->encode(img);
 			std::ofstream outfile(imgpath);
 			outfile.write(reinterpret_cast<char*>(encoded.data()), encoded.size());
 			return {};

@@ -55,7 +55,7 @@ constexpr uint8_t magic_length = 8;
 constexpr uint8_t magic[magic_length] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
 
 
-class PNG_Decoder : public Decoder {
+class PngDecoder : public Decoder {
 
 private:
     size_t bpp;
@@ -70,7 +70,7 @@ private:
     std::vector<uint8_t> inflated_data;
 
 public:
-    PNG_Decoder() = default;
+    PngDecoder() = default;
     bool can_decode(std::ifstream& filestream) const override;
     Image decode(std::ifstream& filestream) override;
 
