@@ -50,8 +50,11 @@ int main(int argc, char** argv) {
     ivmg::Image img = ivmg::open(input_file);
 
 
-    if (!img.save(output_file).has_value())
+    if (!img.save("from.pam").has_value())
     	std::println(std::cerr, "Error when saving the file");
+
+    ivmg::Image img2 = img;
+    img2.save("to.pam");
 
 
     // auto s = std::chrono::high_resolution_clock::now();

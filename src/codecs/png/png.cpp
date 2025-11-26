@@ -103,14 +103,14 @@ Image PngDecoder::decode_png(std::vector<uint8_t>& file_buffer) {
 
 
     const size_t line_in_size = width * bpp + 1;     // Width of the image + 1 byte for the filter type
-    const size_t line_out_size = width * img.nb_channels;
+    const size_t line_out_size = width * img.nb_chan();
 
     uint16_t line_id = 0;
 
     std::span<const uint8_t> data_view(inflated_data);
     auto res = get_scanline(data_view, line_in_size);
 
-    const uint8_t in_out_chan_diff = img.nb_channels - bpp;
+    const uint8_t in_out_chan_diff = img.nb_chan() - bpp;
 
     while (res.has_value()) {
         std::span<const uint8_t> scanline = res.value();
@@ -161,7 +161,7 @@ Image PngDecoder::decode_png(std::vector<uint8_t>& file_buffer) {
 
                     for (size_t i = 0; i < scanline.size(); i++) {
                         const auto dest = i + (i / bpp) * in_out_chan_diff;
-                        const uint8_t left = (i < bpp) ? 0 : output_line[dest - img.nb_channels];
+                        const uint8_t left = (i < bpp) ? 0 : output_line[dest - img.nb_chan()];
                         output_line[dest] = left + scanline[i];
                     }
 
@@ -209,7 +209,7 @@ Image PngDecoder::decode_png(std::vector<uint8_t>& file_buffer) {
                 case PNG_COLOR_TYPE::RGBA: {
 
                     for (size_t i = 0; i < output_line.size(); i++) {
-                        const uint16_t left = (i < bpp) ? 0 : output_line[i - img.nb_channels];
+                        const uint16_t left = (i < bpp) ? 0 : output_line[i - img.nb_chan()];
                         const uint16_t up = (line_id == 0) ? 0 : up_line[i];
                         output_line[i] = scanline[i] + ((left + up) >> 1);
                     }
@@ -235,9 +235,9 @@ Image PngDecoder::decode_png(std::vector<uint8_t>& file_buffer) {
                         const bool first_pixel = i < bpp;
                         const bool first_scanline = line_id == 0;
 
-                        const uint8_t left = first_pixel ? 0 : output_line[i - img.nb_channels];
+                        const uint8_t left = first_pixel ? 0 : output_line[i - img.nb_chan()];
                         const uint8_t up = first_scanline ? 0 : up_line[i];
-                        const uint8_t upleft = (first_pixel || first_scanline) ? 0 : up_line[i - img.nb_channels];
+                        const uint8_t upleft = (first_pixel || first_scanline) ? 0 : up_line[i - img.nb_chan()];
 
                         output_line[i] = this->paeth_predictor(left, up, upleft) + scanline[i];
                     }
@@ -251,9 +251,9 @@ Image PngDecoder::decode_png(std::vector<uint8_t>& file_buffer) {
                         const bool first_scanline = line_id == 0;
                         const size_t j = i / bpp;
 
-                        const uint8_t left = first_pixel ? 0 : output_line[i - img.nb_channels];
+                        const uint8_t left = first_pixel ? 0 : output_line[i - img.nb_chan()];
                         const uint8_t up = first_scanline ? 0 : up_line[i];
-                        const uint8_t upleft = (first_pixel || first_scanline) ? 0 : up_line[i - img.nb_channels];
+                        const uint8_t upleft = (first_pixel || first_scanline) ? 0 : up_line[i - img.nb_chan()];
 
                         output_line[i + j] = this->paeth_predictor(left, up, upleft) + scanline[i];
                     }

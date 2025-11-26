@@ -1,3 +1,5 @@
+#include <cstdint>
+#include <cstring>
 #include <ivmg/core/image.hpp>
 #include <ivmg/imgproc/filter.hpp>
 #include <ivmg/codecs/codecs.hpp>
@@ -10,7 +12,7 @@ using namespace imgproc::filt;
 
 Image Image::operator|(const Conv& f) {
 
-    Image out { w, h };
+    Image out(w, h);
     const size_t num_threads = std::thread::hardware_concurrency();
     const size_t pixels_per_thread = (w * h) / num_threads;
 
@@ -71,6 +73,30 @@ Image Image::operator|(const Conv& f) {
 
 std::expected<void, IVMG_ENC_ERR> Image::save(const std::filesystem::path& imgpath) {
 	return CodecRegistry::encode(*this, imgpath);
+}
+
+
+
+Image::Image(const uint32_t width, const uint32_t height, ColorType ct): w(width), h(height), color_type(ct)
+{
+    nb_channels = colortype_to_chan_nb.at(color_type);
+    data.resize(width * height * nb_channels, 255);
+};
+
+
+Image Image::operator=(Image& other) {
+
+	Image out(other.w, other.h, other.color_type);
+	size_t idx = 0;
+
+	for (Pixel p : other) {
+		data[idx++] = p.r();
+		data[idx++] = p.g();
+		data[idx++] = p.b();
+		data[idx++] = p.a();
+	}
+
+	return out;
 }
 
 
